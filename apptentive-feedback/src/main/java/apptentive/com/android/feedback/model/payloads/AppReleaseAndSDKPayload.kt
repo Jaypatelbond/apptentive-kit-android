@@ -3,6 +3,8 @@ package apptentive.com.android.feedback.model.payloads
 import apptentive.com.android.feedback.Constants
 import apptentive.com.android.feedback.model.AppRelease
 import apptentive.com.android.feedback.model.SDK
+import apptentive.com.android.feedback.payload.AttachmentData
+import apptentive.com.android.feedback.payload.MediaType
 import apptentive.com.android.feedback.payload.PayloadType
 import apptentive.com.android.network.HttpMethod
 import apptentive.com.android.util.generateUUID
@@ -27,8 +29,7 @@ internal class AppReleaseAndSDKPayload(
     val versionCode: Int,
     val versionName: String
 ) : ConversationPayload(nonce) {
-
-    //region Inheritance
+    override fun getContentType(): MediaType = MediaType.applicationJson
 
     override fun getHttpMethod(): HttpMethod = HttpMethod.PUT
 
@@ -38,7 +39,9 @@ internal class AppReleaseAndSDKPayload(
 
     override fun getPayloadType(): PayloadType = PayloadType.AppReleaseAndSDK
 
-    //endregion
+    override fun getDataBytes() = toJson().toByteArray()
+
+    override fun getAttachmentDataBytes() = AttachmentData()
 
     companion object {
         fun buildPayload(sdk: SDK, appRelease: AppRelease): AppReleaseAndSDKPayload {

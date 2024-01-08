@@ -4,6 +4,7 @@ package apptentive.com.android.util
 object LogTags {
     val CORE = LogTag("CORE")
     val NETWORK = LogTag("NETWORK")
+    val INJECTION = LogTag("INJECTION")
     val EVENT = LogTag("EVENT")
     val EVENT_NOTIFICATION = LogTag("EVENT_NOTIFICATION")
     val MESSAGE_CENTER_NOTIFICATION = LogTag("MESSAGE_CENTER_NOTIFICATION")
@@ -34,5 +35,4 @@ object LogTags {
     val CRYPTOGRAPHY = LogTag("ENCRYPT_AND_DECRYPT")
     val PUSH_NOTIFICATION = LogTag("PUSH_NOTIFICATION")
     val SURVEY = LogTag("SURVEY")
-    val STATE_MACHINE = LogTag("STATE_MACHINE")
 }

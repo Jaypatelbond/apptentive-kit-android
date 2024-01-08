@@ -13,7 +13,7 @@ internal class RatingDialogViewModel : ViewModel() {
     private val interaction: RatingDialogInteraction = try {
         DependencyProvider.of<RatingDialogInteractionFactory>().getRatingDialogInteraction()
     } catch (exception: Exception) {
-        getInteractionBackup()
+        getInteractionBackup(context.getAppActivity())
     }
 
     val title = interaction.title

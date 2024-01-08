@@ -39,6 +39,7 @@ class ThrottleUtilsTest : TestCase() {
         sharedPreferences =
             context.getSharedPreferences(APPTENTIVE_TEST_SHARED_PREF, Context.MODE_PRIVATE)
         throttleUtils.ratingThrottleLength = 100L
+        throttleUtils.throttleSharedPrefs = sharedPreferences
         super.setUp()
     }
 

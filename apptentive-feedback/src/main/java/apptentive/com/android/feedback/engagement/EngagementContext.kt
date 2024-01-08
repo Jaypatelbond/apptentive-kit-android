@@ -8,9 +8,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import apptentive.com.android.concurrent.Executors
-import apptentive.com.android.core.DependencyProvider
 import apptentive.com.android.feedback.Apptentive
-import apptentive.com.android.feedback.conversation.ConversationCredentialProvider
 import apptentive.com.android.feedback.engagement.criteria.InvocationConverter
 import apptentive.com.android.feedback.engagement.interactions.InteractionResponse
 import apptentive.com.android.feedback.model.InvocationData
@@ -60,10 +58,7 @@ open class EngagementContext(
         invocations = invocations.map(InvocationConverter::convert)
     )
 
-    fun enqueuePayload(payload: Payload) {
-        val conversationCredential = DependencyProvider.of<ConversationCredentialProvider>()
-        payloadSender.enqueuePayload(payload, conversationCredential)
-    }
+    fun sendPayload(payload: Payload) = payloadSender.sendPayload(payload)
 
     @VisibleForTesting
     fun getEngagement() = engagement

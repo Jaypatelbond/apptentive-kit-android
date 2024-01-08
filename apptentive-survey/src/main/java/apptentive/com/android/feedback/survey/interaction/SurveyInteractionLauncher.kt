@@ -22,7 +22,7 @@ internal class SurveyInteractionLauncher : AndroidViewInteractionLauncher<Survey
         Log.i(INTERACTIONS, "Survey interaction launched with title: ${interaction.name}")
         Log.v(INTERACTIONS, "Survey interaction data: $interaction")
 
-        saveInteractionBackup(interaction)
+        saveInteractionBackup(interaction, engagementContext.getAppActivity())
 
         DependencyProvider.register(SurveyModelFactoryProvider(engagementContext, interaction))
 

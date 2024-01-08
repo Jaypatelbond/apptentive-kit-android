@@ -33,6 +33,7 @@ internal class SurveyInteractionTypeConverter : InteractionTypeConverter<SurveyI
             },
             termsAndConditions = configuration.optMap("terms_and_conditions")?.convertTermsAndConditions(),
             renderAs = configuration.getString("render_as"),
+            nextText = configuration.optString("next_text"),
             introButtonText = configuration.optString("intro_button_text"),
             successButtonText = configuration.optString("success_button_text"),
             disclaimerText = configuration.optString("disclaimer_text"),

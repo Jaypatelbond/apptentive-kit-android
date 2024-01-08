@@ -1,2 +1,2 @@
 -keepattributes SourceFile,LineNumberTable
--keep class com.google.android.play.review.** { *; }
+-keep class com.google.android.play.core.review.** { *; }

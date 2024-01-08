@@ -14,7 +14,7 @@ internal class EnjoymentDialogViewModel : ViewModel() {
     private val interaction: EnjoymentDialogInteraction = try {
         DependencyProvider.of<EnjoymentDialogInteractionFactory>().getEnjoymentDialogInteraction()
     } catch (exception: Exception) {
-        getInteractionBackup()
+        getInteractionBackup(context.getAppActivity())
     }
 
     val title = interaction.title

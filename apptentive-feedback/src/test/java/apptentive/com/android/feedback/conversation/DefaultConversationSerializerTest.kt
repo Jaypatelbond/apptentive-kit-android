@@ -6,14 +6,9 @@ import apptentive.com.android.encryption.EncryptionFactory
 import apptentive.com.android.encryption.NotEncrypted
 import apptentive.com.android.feedback.createMockConversation
 import apptentive.com.android.feedback.engagement.util.MockAndroidSharedPrefDataStore
-import apptentive.com.android.feedback.engagement.util.MockFileSystem
 import apptentive.com.android.feedback.model.EngagementManifest
-import apptentive.com.android.feedback.platform.FileSystem
-import apptentive.com.android.feedback.utils.FileStorageUtil
 import apptentive.com.android.platform.AndroidSharedPrefDataStore
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockkObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
@@ -27,30 +22,20 @@ import kotlin.random.Random
 class DefaultConversationSerializerTest : TestCase() {
     @get:Rule
     val tempFolder = TemporaryFolder()
-    lateinit var conversationFile: File
-    lateinit var manifestFile: File
 
     @Before
     override fun setUp() {
         val mockDataStore = MockAndroidSharedPrefDataStore()
         mockDataStore.putString("test", "test", "test")
         DependencyProvider.register<AndroidSharedPrefDataStore>(mockDataStore)
-        DependencyProvider.register<FileSystem>(MockFileSystem())
-        conversationFile = createTempFile("conversation.bin")
-        manifestFile = createTempFile("manifest.bin")
-        mockkObject(FileStorageUtil)
-        every {
-            FileStorageUtil.getManifestFile()
-        } returns manifestFile
-        every {
-            FileStorageUtil.getConversationFileForActiveUser(any())
-        } returns conversationFile
     }
 
     @Test
     fun testLoadingNonExistingConversation() {
+        val conversationFile = createTempFile("conversation.bin")
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = conversationFile,
+            manifestFile = createTempFile("manifest.json"),
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -59,18 +44,16 @@ class DefaultConversationSerializerTest : TestCase() {
                 )
             )
         }
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
+
         val conversation = serializer.loadConversation()
         assertThat(conversation).isNull()
     }
 
     @Test
     fun testSerialization() {
-        every {
-            FileStorageUtil.hasStoragePriorToSkipLogic()
-        } returns false
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = createTempFile("conversation.bin"),
+            manifestFile = createTempFile("manifest.json"),
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -79,8 +62,7 @@ class DefaultConversationSerializerTest : TestCase() {
                 )
             )
         }
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.initializeSerializer()
+
         val conversation = createMockConversation()
         serializer.saveConversation(conversation)
 
@@ -92,7 +74,8 @@ class DefaultConversationSerializerTest : TestCase() {
     @Test
     fun testSerializationNewConversation() {
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = createTempFile("conversation.bin"),
+            manifestFile = createTempFile("manifest.json"),
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -101,8 +84,7 @@ class DefaultConversationSerializerTest : TestCase() {
                 )
             )
         }
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.initializeSerializer()
+
         val conversation = createMockConversation(
             engagementManifest = EngagementManifest()
         )
@@ -114,12 +96,10 @@ class DefaultConversationSerializerTest : TestCase() {
 
     @Test
     fun testSingleManifestSerialization() {
-        every {
-            FileStorageUtil.hasStoragePriorToSkipLogic()
-        } returns false
-        val manifestFile = createTempFile("manifest_structure_test.json")
+        val manifestFile = createTempFile("manifest.json")
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = createTempFile("conversation.bin"),
+            manifestFile = manifestFile,
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -128,8 +108,7 @@ class DefaultConversationSerializerTest : TestCase() {
                 )
             )
         }
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.initializeSerializer()
+
         val conversation = createMockConversation()
         serializer.saveConversation(conversation)
 
@@ -155,13 +134,14 @@ class DefaultConversationSerializerTest : TestCase() {
 
     @Test(expected = ConversationSerializationException::class)
     fun testCorruptedConversationData() {
-        every {
-            FileStorageUtil.hasStoragePriorToSkipLogic()
-        } returns true // write random data
+        val conversationFile = createTempFile("conversation.bin")
+        // write random data
         conversationFile.writeBytes(Random.nextBytes(10))
-        val manifestFile = createTempFile("manifest_structure_test.json")
+
+        val manifestFile = createTempFile("manifest.json")
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = conversationFile,
+            manifestFile = manifestFile,
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -170,9 +150,6 @@ class DefaultConversationSerializerTest : TestCase() {
                 )
             )
         }
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.saveRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.initializeSerializer()
 
         // this throws an exception
         serializer.loadConversation()
@@ -180,13 +157,10 @@ class DefaultConversationSerializerTest : TestCase() {
 
     @Test
     fun testCorruptedManifestData() {
-        every {
-            FileStorageUtil.hasStoragePriorToSkipLogic()
-        } returns true
-
-        val manifestFile = createTempFile("manifest_structure_test.json")
+        val manifestFile = createTempFile("manifest.json")
         val serializer = DefaultConversationSerializer(
-            conversationRosterFile = createTempFile("roster.bin"),
+            conversationFile = createTempFile("conversation.bin"),
+            manifestFile = manifestFile,
         ).apply {
             setEncryption(
                 encryption = EncryptionFactory.getEncryption(
@@ -194,13 +168,10 @@ class DefaultConversationSerializerTest : TestCase() {
                     oldEncryptionSetting = NotEncrypted
                 )
             )
-            setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-            initializeSerializer()
         }
 
         val conversation = createMockConversation()
-        serializer.setRoster(ConversationRoster(activeConversation = ConversationMetaData(ConversationState.Undefined, tempFolder.root.path)))
-        serializer.saveConversation(conversation,)
+        serializer.saveConversation(conversation)
 
         // write corrupted data
         manifestFile.writeText("{") // illegal json

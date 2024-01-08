@@ -6,8 +6,6 @@ import apptentive.com.android.TestCase
 import apptentive.com.android.core.DependencyProvider
 import apptentive.com.android.feedback.EngagementResult
 import apptentive.com.android.feedback.MockTimeRule
-import apptentive.com.android.feedback.conversation.ConversationCredentialProvider
-import apptentive.com.android.feedback.conversation.MockConversationCredential
 import apptentive.com.android.feedback.engagement.EngageArgs
 import apptentive.com.android.feedback.engagement.EngagementCallback
 import apptentive.com.android.feedback.engagement.Event
@@ -38,8 +36,6 @@ class SurveyInteractionLauncherTest : TestCase() {
 
     @Test
     fun testViewModel() {
-        DependencyProvider.register<ConversationCredentialProvider>(MockConversationCredential())
-
         val context = createEngagementContext()
         val model = createSurveyModel(
             createSingleLineQuestionForV12(id = "id_1"),
@@ -99,7 +95,7 @@ class SurveyInteractionLauncherTest : TestCase() {
             EngagementResult.InteractionNotShown("No runnable interactions")
         },
         onSendPayload = onSendPayload ?: { payload ->
-            addResult(payload.toJson(true, null))
+            addResult(payload.toJson())
         }
     )
 

@@ -3,6 +3,8 @@ package apptentive.com.android.feedback.model.payloads
 import androidx.annotation.VisibleForTesting
 import apptentive.com.android.feedback.Constants.buildHttpPath
 import apptentive.com.android.feedback.model.SensitiveDataKey
+import apptentive.com.android.feedback.payload.AttachmentData
+import apptentive.com.android.feedback.payload.MediaType
 import apptentive.com.android.feedback.payload.PayloadType
 import apptentive.com.android.feedback.utils.SensitiveDataUtils
 import apptentive.com.android.network.HttpMethod
@@ -18,20 +20,18 @@ internal class PersonPayload(
     @SensitiveDataKey val mParticleId: String? = null,
     @SensitiveDataKey val customData: Map<String, Any?>? = null,
 ) : ConversationPayload(nonce) {
-
-    //region Inheritance
-
     override fun getPayloadType() = PayloadType.Person
-
     override fun getJsonContainer() = "person"
 
     override fun getHttpMethod() = HttpMethod.PUT
 
     override fun getHttpPath() = buildHttpPath("person")
 
-    //endregion
+    override fun getContentType() = MediaType.applicationJson
 
-    //region Equality
+    override fun getDataBytes() = toJson().toByteArray()
+
+    override fun getAttachmentDataBytes() = AttachmentData()
 
     override fun equals(other: Any?): Boolean {
         return when {
@@ -55,8 +55,6 @@ internal class PersonPayload(
         result = 31 * result + customData.hashCode()
         return result
     }
-
-    //endregion
 
     override fun toString(): String {
         return SensitiveDataUtils.logWithSanitizeCheck(javaClass, toJsonObject())

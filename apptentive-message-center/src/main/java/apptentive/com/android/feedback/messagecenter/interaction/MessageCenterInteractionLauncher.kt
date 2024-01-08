@@ -23,7 +23,7 @@ internal class MessageCenterInteractionLauncher : AndroidViewInteractionLauncher
         Log.i(INTERACTIONS, "Message Center interaction launched with title: ${interaction.title}")
         Log.v(INTERACTIONS, "Message Center interaction data: $interaction")
 
-        saveInteractionBackup(interaction)
+        saveInteractionBackup(interaction, engagementContext.getAppActivity())
 
         DependencyProvider.register(MessageCenterModelProvider(interaction))
 

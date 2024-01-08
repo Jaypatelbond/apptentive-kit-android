@@ -17,7 +17,7 @@ internal class TextModalViewModel : ViewModel() {
     private val interaction: TextModalModel = try {
         DependencyProvider.of<TextModalModelFactory>().getTextModalModel()
     } catch (exception: Exception) {
-        val interaction: TextModalInteraction = getInteractionBackup()
+        val interaction: TextModalInteraction = getInteractionBackup(context.getAppActivity())
 
         TextModalModel(
             id = interaction.id,

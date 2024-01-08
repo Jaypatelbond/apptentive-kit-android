@@ -130,8 +130,7 @@ class LegacyConversationManagerTest : TestCase() {
 
         val encryption = EncryptionFactory.NULL // it's impossible to automatically test encrypted storage since KeyStore does not allow exporting keys
         val manager = DefaultLegacyConversationManager(context, encryption)
-        val metaData = manager.loadLegacyConversationMetadata()
-        val legacyData = manager.loadLegacyConversationData(metaData)
+        val legacyData = manager.loadLegacyConversationData()
             ?: throw AssertionError("Unable to load legacy conversation")
 
         val expected = createExpectedConversation(path)
@@ -147,8 +146,7 @@ class LegacyConversationManagerTest : TestCase() {
 
         val encryption = EncryptionFactory.NULL // it's impossible to automatically test encrypted storage since KeyStore does not allow exporting keys
         val manager = DefaultLegacyConversationManager(context, encryption)
-        val metadata = manager.loadLegacyConversationMetadata()
-        val legacyData = manager.loadLegacyConversationData(metadata)
+        val legacyData = manager.loadLegacyConversationData()
             ?: throw AssertionError("Unable to load legacy conversation")
 
         val actual = legacyData.toConversation()
@@ -178,8 +176,7 @@ class LegacyConversationManagerTest : TestCase() {
 
         val encryption = EncryptionFactory.NULL // it's impossible to automatically test encrypted storage since KeyStore does not allow exporting keys
         val manager = DefaultLegacyConversationManager(context, encryption)
-        val metadata = manager.loadLegacyConversationMetadata()
-        val legacyData = manager.loadLegacyConversationData(metadata)
+        val legacyData = manager.loadLegacyConversationData()
             ?: throw AssertionError("Unable to load legacy conversation")
 
         val expected = createExpectedConversation(path)

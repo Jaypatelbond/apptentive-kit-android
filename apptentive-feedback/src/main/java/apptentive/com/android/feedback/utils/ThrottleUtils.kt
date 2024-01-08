@@ -1,6 +1,7 @@
 package apptentive.com.android.feedback.utils
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import apptentive.com.android.core.DependencyProvider
 import apptentive.com.android.feedback.Constants
 import apptentive.com.android.feedback.engagement.interactions.Interaction
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit
 
 internal object ThrottleUtils {
     internal var ratingThrottleLength: Long? = null
+    internal var throttleSharedPrefs: SharedPreferences? = null
 
     private val defaultThrottleLength = TimeUnit.SECONDS.toMillis(1)
 
@@ -24,7 +26,7 @@ internal object ThrottleUtils {
             listOf(InteractionType.GoogleInAppReview, InteractionType.RatingDialog)
 
         val currentTime = System.currentTimeMillis()
-        val interactionLastThrottledTime = DependencyProvider.of<AndroidSharedPrefDataStore>().getLong(SharedPrefConstants.THROTTLE_UTILS, interactionName, 0)
+        val interactionLastThrottledTime = throttleSharedPrefs?.getLong(interactionName, 0) ?: 0
         val interactionLastThrottledLength = currentTime - interactionLastThrottledTime
 
         return ratingThrottleLength?.let { ratingLength ->
@@ -38,7 +40,7 @@ internal object ThrottleUtils {
                     true
                 }
                 else -> {
-                    DependencyProvider.of<AndroidSharedPrefDataStore>().putLong(SharedPrefConstants.THROTTLE_UTILS, interactionName, currentTime)
+                    throttleSharedPrefs?.edit()?.putLong(interactionName, currentTime)?.commit()
                     false
                 }
             }

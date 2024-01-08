@@ -19,7 +19,7 @@ internal class EnjoymentDialogInteractionLauncher :
 
         engagementContext.executors.main.execute {
             try {
-                saveInteractionBackup(interaction)
+                saveInteractionBackup(interaction, engagementContext.getAppActivity())
                 DependencyProvider.register(EnjoymentDialogInteractionProvider(interaction))
 
                 val fragmentManager = engagementContext.getFragmentManager()

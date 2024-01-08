@@ -12,7 +12,7 @@ import apptentive.com.android.util.Factory
 import apptentive.com.android.util.generateUUID
 
 internal interface ConversationRepository {
-    fun createConversation(conversationId: String? = null, conversationToken: String? = null): Conversation
+    fun createConversation(): Conversation
 
     @Throws(ConversationSerializationException::class)
     fun saveConversation(conversation: Conversation)
@@ -20,18 +20,11 @@ internal interface ConversationRepository {
     @Throws(ConversationSerializationException::class)
     fun loadConversation(): Conversation?
 
-    @Throws(ConversationSerializationException::class)
-    fun initializeRepositoryWithRoster(): ConversationRoster
-
     fun getCurrentAppRelease(): AppRelease
 
     fun getCurrentSdk(): SDK
 
     fun updateEncryption(encryption: Encryption)
-
-    fun updateConversationRoster(conversationRoster: ConversationRoster)
-
-    fun saveRoster(conversationRoster: ConversationRoster)
 }
 
 internal class DefaultConversationRepository(
@@ -43,11 +36,9 @@ internal class DefaultConversationRepository(
     private val manifestFactory: Factory<EngagementManifest>,
     private val engagementDataFactory: Factory<EngagementData>
 ) : ConversationRepository {
-    override fun createConversation(conversationId: String?, conversationToken: String?): Conversation {
+    override fun createConversation(): Conversation {
         return Conversation(
             localIdentifier = generateUUID(),
-            conversationId = conversationId,
-            conversationToken = conversationToken,
             person = personFactory.create(),
             device = deviceFactory.create(),
             appRelease = appReleaseFactory.create(),
@@ -64,21 +55,11 @@ internal class DefaultConversationRepository(
     @Throws(ConversationSerializationException::class)
     override fun loadConversation(): Conversation? = conversationSerializer.loadConversation()
 
-    override fun initializeRepositoryWithRoster(): ConversationRoster = conversationSerializer.initializeSerializer()
-
     override fun getCurrentAppRelease(): AppRelease = appReleaseFactory.create()
 
     override fun getCurrentSdk(): SDK = sdkFactory.create()
 
     override fun updateEncryption(encryption: Encryption) {
         conversationSerializer.setEncryption(encryption)
-    }
-
-    override fun updateConversationRoster(conversationRoster: ConversationRoster) {
-        conversationSerializer.setRoster(conversationRoster)
-    }
-
-    override fun saveRoster(conversationRoster: ConversationRoster) {
-        conversationSerializer.saveRoster(conversationRoster)
     }
 }

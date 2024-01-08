@@ -3,8 +3,6 @@ package apptentive.com.android.feedback.message
 import android.text.format.DateUtils.DAY_IN_MILLIS
 import apptentive.com.android.TestCase
 import apptentive.com.android.core.toSeconds
-import apptentive.com.android.encryption.Encryption
-import apptentive.com.android.feedback.conversation.ConversationRoster
 import apptentive.com.android.feedback.model.Message
 import apptentive.com.android.feedback.model.Sender
 import apptentive.com.android.serialization.json.JsonConverter
@@ -12,7 +10,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Ignore
 import org.junit.Test
-import java.io.File
 
 class MessageRepositoryTest : TestCase() {
 
@@ -251,13 +248,7 @@ class MessageRepositoryTest : TestCase() {
             savedList = messages
         }
 
-        override fun deleteMessageFile(messageFile: File) {
-        }
-
-        override fun updateEncryption(encryption: Encryption) {
-        }
-
-        override fun updateConversionRoster(conversationRoster: ConversationRoster) {
+        override fun deleteAllMessages() {
         }
     }
 }

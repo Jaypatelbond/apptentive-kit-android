@@ -30,6 +30,7 @@ internal class ApptentiveLifecycleObserver(
         super.onStart(owner)
         stateExecutor.execute {
             Log.d(LIFE_CYCLE_OBSERVER, "App is in foreground")
+            client.engage(Event.internal(InternalEvent.APP_LAUNCH.labelName))
             onForeground()
         }
     }

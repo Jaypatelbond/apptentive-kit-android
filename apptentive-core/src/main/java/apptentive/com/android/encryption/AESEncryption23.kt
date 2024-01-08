@@ -35,20 +35,10 @@ class AESEncryption23(private val keyInfo: EncryptionKey) : Encryption {
     }
 
     override fun encrypt(data: ByteArray): ByteArray {
-        return encrypt(data, true)
-    }
-
-    fun encryptPayloadData(data: ByteArray): ByteArray {
-        return encrypt(data, false)
-    }
-
-    fun encrypt(data: ByteArray, includeIVLength: Boolean): ByteArray {
         val encryptCipher = encryptCipherForIv()
         val outputStream = ByteArrayOutputStream()
 
-        if (includeIVLength) {
-            outputStream.write(encryptCipher.iv.size)
-        }
+        outputStream.write(encryptCipher.iv.size)
         outputStream.write(encryptCipher.iv)
 
         val stream = CipherOutputStream(outputStream, encryptCipher)
@@ -70,22 +60,13 @@ class AESEncryption23(private val keyInfo: EncryptionKey) : Encryption {
 
     override fun decrypt(data: ByteArray): ByteArray {
         val inputStream = ByteArrayInputStream(data)
-        return decrypt(inputStream, true)
+        return decrypt(inputStream)
     }
 
     override fun decrypt(inputStream: InputStream): ByteArray {
-        return decrypt(inputStream, true)
-    }
-
-    fun decryptPayloadData(data: ByteArray): ByteArray {
-        val inputStream = ByteArrayInputStream(data)
-        return decrypt(inputStream, false)
-    }
-
-    fun decrypt(inputStream: InputStream, decodeIVLength: Boolean): ByteArray {
         val outputStream = ByteArrayOutputStream()
         inputStream.use { input ->
-            val ivSize = if (decodeIVLength) input.read() else IV_LENGTH
+            val ivSize = input.read()
             val iv = ByteArray(ivSize)
             input.read(iv)
             val decryptCipher = decryptCipherForIv(iv)

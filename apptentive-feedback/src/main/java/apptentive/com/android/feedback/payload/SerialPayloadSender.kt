@@ -1,6 +1,5 @@
 package apptentive.com.android.feedback.payload
 
-import apptentive.com.android.feedback.conversation.ConversationCredentialProvider
 import apptentive.com.android.feedback.model.payloads.Payload
 import apptentive.com.android.util.Log
 import apptentive.com.android.util.LogTags.PAYLOADS
@@ -14,9 +13,9 @@ internal class SerialPayloadSender(
     private var busySending: Boolean = false
     private var payloadService: PayloadService? = null
 
-    override fun enqueuePayload(payload: Payload, credentialProvider: ConversationCredentialProvider) {
+    override fun sendPayload(payload: Payload) {
         Log.v(PAYLOADS, "Adding Payload to queue: $payload")
-        val payloadData = getPayloadData(payload, credentialProvider)
+        val payloadData = getPayloadData(payload)
         if (payloadData != null) {
             payloadQueue.enqueuePayload(payloadData)
         }
@@ -35,11 +34,6 @@ internal class SerialPayloadSender(
         }
     }
 
-    override fun updateCredential(credentialProvider: ConversationCredentialProvider) {
-        payloadQueue.updateCredential(credentialProvider)
-        sendNextUnsentPayload()
-    }
-
     private fun handleSentPayload(payload: PayloadData) {
         payloadQueue.deletePayloadAndAssociatedFiles(payload)
         notifySuccess(payload)
@@ -55,18 +49,10 @@ internal class SerialPayloadSender(
         } else {
             notifyFailure(error, payload)
         }
-
-        if (error is AuthenticationFailureException) {
-            payloadQueue.invalidateCredential(payload.tag)
-        }
     }
 
     private fun shouldDeletePayload(error: Throwable): Boolean {
         return when (error) {
-            is AuthenticationFailureException -> {
-                Log.d(PAYLOADS, "Payload failed with auth error... saving")
-                false
-            }
             is PayloadSendException -> {
                 Log.d(PAYLOADS, "Payload failed to send... deleting")
                 true
@@ -124,9 +110,9 @@ internal class SerialPayloadSender(
 
     val hasPayloadService get() = payloadService != null
 
-    private fun getPayloadData(payload: Payload, credentialProvider: ConversationCredentialProvider): PayloadData? {
+    private fun getPayloadData(payload: Payload): PayloadData? {
         try {
-            return payload.toPayloadData(credentialProvider)
+            return payload.toPayloadData()
         } catch (e: Exception) {
             Log.e(PAYLOADS, "Exception while creating payload data: $payload", e)
         }

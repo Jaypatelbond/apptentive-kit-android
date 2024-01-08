@@ -10,7 +10,6 @@ import apptentive.com.android.core.Observable
 import apptentive.com.android.feedback.Apptentive
 import apptentive.com.android.feedback.UnreadMessageCallback
 import apptentive.com.android.feedback.backend.MessageCenterService
-import apptentive.com.android.feedback.conversation.ConversationCredentialProvider
 import apptentive.com.android.feedback.engagement.EngagementContextFactory
 import apptentive.com.android.feedback.lifecycle.LifecycleListener
 import apptentive.com.android.feedback.model.Configuration
@@ -19,7 +18,6 @@ import apptentive.com.android.feedback.model.Message
 import apptentive.com.android.feedback.model.Person
 import apptentive.com.android.feedback.model.Sender
 import apptentive.com.android.feedback.payload.PayloadData
-import apptentive.com.android.feedback.utils.FileStorageUtil
 import apptentive.com.android.feedback.utils.FileUtil
 import apptentive.com.android.util.InternalUseOnly
 import apptentive.com.android.util.Log
@@ -41,18 +39,19 @@ import java.io.InputStream
 
 @InternalUseOnly
 class MessageManager(
+    private val conversationId: String?,
+    private val conversationToken: String?,
     private val messageCenterService: MessageCenterService,
     private val serialExecutor: Executor,
-    private val messageRepository: MessageRepository,
+    private val messageRepository: MessageRepository
 ) : LifecycleListener, ConversationListener {
 
-    private var messagesFromStorage: List<Message> = messageRepository.getAllMessages()
+    private val messagesFromStorage: List<Message> = messageRepository.getAllMessages()
     private var hasSentMessage: Boolean = messagesFromStorage.isNotEmpty() // True after the first non hidden message is sent from mc client
 
     private var isMessageCenterInForeground = false
     private var lastDownloadedMessageID: String = messageRepository.getLastReceivedMessageIDFromEntries()
     var messageCustomData: Map<String, Any?>? = null
-    var isLoggedOut: Boolean = false
 
     @VisibleForTesting
     val pollingScheduler: PollingScheduler by lazy {
@@ -79,7 +78,7 @@ class MessageManager(
     }
 
     override fun onAppForeground() {
-        if (hasSentMessage && !isLoggedOut) {
+        if (hasSentMessage) {
             Log.d(MESSAGE_CENTER, "App is in the foreground & hasSentMessage is true, start polling")
             startPolling()
         }
@@ -91,32 +90,6 @@ class MessageManager(
         profileSubject.value = senderProfile
     }
 
-    fun logout() {
-        pollingScheduler.stopPolling()
-        messageRepository.logout()
-        messagesFromStorage = emptyList()
-        messagesSubject.value = emptyList()
-        hasSentMessage = false
-        isMessageCenterInForeground = false
-        lastDownloadedMessageID = ""
-        messageCustomData = null
-        isLoggedOut = true
-        unreadMessageCountUpdate = null
-    }
-
-    fun resetForAnonymousToLogin() {
-        FileStorageUtil.deleteMessageFile()
-        lastDownloadedMessageID = ""
-    }
-
-    fun login() {
-        messagesFromStorage = messageRepository.getAllMessages()
-        hasSentMessage = messagesFromStorage.isNotEmpty()
-        lastDownloadedMessageID = messageRepository.getLastReceivedMessageIDFromEntries()
-        messagesSubject.value = messagesFromStorage
-        isLoggedOut = false
-    }
-
     fun setCustomData(customData: Map<String, Any?>) {
         this.messageCustomData = customData
     }
@@ -126,12 +99,9 @@ class MessageManager(
     }
 
     fun fetchMessages() {
-        val conversationCredential = DependencyProvider.of<ConversationCredentialProvider>()
-        val token = conversationCredential.conversationToken
-        val id = conversationCredential.conversationId
-        if (!fetchingInProgress && !id.isNullOrEmpty() && !token.isNullOrEmpty()) {
+        if (!fetchingInProgress && !conversationId.isNullOrEmpty() && !conversationToken.isNullOrEmpty()) {
             fetchingInProgress = true
-            messageCenterService.getMessages(token, id, lastDownloadedMessageID) {
+            messageCenterService.getMessages(conversationToken, conversationId, lastDownloadedMessageID) {
                 // Store the message list
                 if (it is Result.Success) {
                     Log.d(MESSAGE_CENTER, "Fetch finished successfully")
@@ -157,7 +127,7 @@ class MessageManager(
                 newMessages.map { message ->
                     message.messageStatus = Message.Status.Saved
                     message
-                },
+                }
             )
             messagesSubject.value = messageRepository.getAllMessages()
             true
@@ -197,7 +167,7 @@ class MessageManager(
         messageRepository.addOrUpdateMessages(listOf(message))
         messagesSubject.value = messageRepository.getAllMessages()
 
-        context.enqueuePayload(message.toMessagePayload())
+        context.sendPayload(message.toMessagePayload())
         clearCustomData()
         if (!hasSentMessage) {
             hasSentMessage = true
@@ -215,7 +185,7 @@ class MessageManager(
         messageRepository.addOrUpdateMessages(listOf(message))
         messagesSubject.value = messageRepository.getAllMessages()
 
-        context.enqueuePayload(message.toMessagePayload())
+        context.sendPayload(message.toMessagePayload())
         if (!hasSentMessage) {
             hasSentMessage = true
             startPolling()
@@ -333,8 +303,7 @@ class MessageManager(
             messagesSubject.value = messageRepository.getAllMessages()
             // Fetch messages as soon as message center comes to foreground. Needed for migration
             fetchMessages()
-        } else
-            messageRepository.saveMessages()
+        }
         isMessageCenterInForeground = isActive
         Log.d(MESSAGE_CENTER, "Message center foreground status $isActive")
         // Resets polling with the right polling interval

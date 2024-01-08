@@ -40,7 +40,7 @@ internal fun createSurveyViewModel(
         createSurveyViewModel(
             DefaultSurveyModelFactory(
                 context,
-                getInteractionBackup()
+                getInteractionBackup(context.getAppActivity())
             ).getSurveyModel(),
             context
         )
@@ -56,7 +56,7 @@ private fun createSurveyViewModel(
     onSubmit = { answers ->
 
         // send response
-        context.enqueuePayload(SurveyResponsePayload.fromAnswers(surveyModel.interactionId, answers))
+        context.sendPayload(SurveyResponsePayload.fromAnswers(surveyModel.interactionId, answers))
 
         // engage 'submit' event
         context.engage(

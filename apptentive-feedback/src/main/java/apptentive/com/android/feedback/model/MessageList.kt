@@ -103,8 +103,11 @@ data class Message(
 
     fun toMessagePayload(): MessagePayload = MessagePayload(
         messageNonce = nonce,
+        boundary = generateUUID().replace("-", ""),
         attachments = attachments.orEmpty(),
+        type = type,
         body = body,
+        sender = sender,
         automated = automated,
         hidden = hidden,
         customData = customData

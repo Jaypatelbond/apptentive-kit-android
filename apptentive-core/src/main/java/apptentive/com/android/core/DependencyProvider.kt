@@ -21,9 +21,6 @@ object DependencyProvider {
         lookup.clear()
     }
 
-    inline fun <reified T> isRegistered() =
-        lookup[T::class.java] != null
-
     inline fun <reified T> of(): T {
         val provider = lookup[T::class.java] ?: throw IllegalArgumentException("Provider is not registered: ${T::class.java}")
         return provider.get() as T
