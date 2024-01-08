@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_margin">4dp</dimen>
+    <dimen name="icon_padding">4dp</dimen>
+    <dimen name="title_margin">8dp</dimen>
+    <dimen name="horizontal_spacing">8dp</dimen>
+    <dimen name="dropdown_min_height">4dp</dimen>
+    <dimen name="vertical_spacing">4dp</dimen>
+    <dimen name="section_spacing_margin">8dp</dimen>
+    <dimen name="margin_4dp">4dp</dimen>
+    <dimen name="button_min_height">8dp</dimen>
+    <dimen name="event_margin">8dp</dimen>
+    <dimen name="event_button_top_margin">8dp</dimen>
+    <dimen name="add_button_min_width">8dp</dimen>
+    <dimen name="remove_section_spacing">8dp</dimen>
+    <dimen name="margin_32">32dp</dimen>
+</resources>

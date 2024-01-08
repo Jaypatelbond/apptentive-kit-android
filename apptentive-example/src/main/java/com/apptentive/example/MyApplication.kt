@@ -1,6 +1,8 @@
 package com.apptentive.example
 
 import android.app.Application
+import apptentive.com.android.feedback.Apptentive
+import apptentive.com.android.feedback.ApptentiveConfiguration
 
 class MyApplication : Application() {
     override fun onCreate() {

@@ -74,7 +74,7 @@ internal class SurveyQuestionContainerView(
         titleTextViewDefaultColor = titleTextView.textColors
         instructionsTextViewDefaultColor = instructionsTextView.textColors
 
-        errorColor = context.getThemeColor(R.attr.colorError)
+        errorColor = context.getThemeColor(androidx.appcompat.R.attr.colorError)
     }
 
     fun setAnswerView(layoutId: Int) {

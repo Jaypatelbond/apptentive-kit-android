@@ -15,7 +15,9 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import apptentive.com.android.feedback.Apptentive
 import apptentive.com.android.feedback.ApptentiveActivityInfo
-import apptentive.com.app.databinding.ActivityDevFunctionsBinding
+import com.apptentive.apptentive_example.BuildConfig
+import com.apptentive.apptentive_example.R
+import com.apptentive.apptentive_example.databinding.ActivityDevFunctionsBinding
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.io.IOException
@@ -28,8 +30,8 @@ class DevFunctionsActivity : AppCompatActivity(), ApptentiveActivityInfo {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE)
-        val isNightMode = prefs.getBoolean(EXTRA_NIGHT_MODE, false)
+        val prefs = getSharedPreferences("SHARED_PREFS", MODE_PRIVATE)
+        val isNightMode = prefs.getBoolean("EXTRA_NIGHT_MODE", false)
         delegate.localNightMode = if (isNightMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
 
         binding = ActivityDevFunctionsBinding.inflate(layoutInflater)
